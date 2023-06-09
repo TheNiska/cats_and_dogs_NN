@@ -1,75 +1,41 @@
-from PIL import Image
+import pandas as pd
 import numpy as np
-import os
-
-cats_pth = "Animal Images/cats/"
-dogs_pth = "Animal Images/dogs/"
-
-X = np.zeros(shape=(22501, 30000), dtype=np.uint8)
-Y = np.zeros(shape=(30000,), dtype=np.uint8)
-
-i = 0
-# loop for reading cats images
-for filename in os.listdir(cats_pth):
-    if i >= 15000:
-        break
-    if i % 450 == 0:
-        print(f"Done {int(i / 29999 * 100)} %")
-
-    image = Image.open(os.path.join(cats_pth, filename))
-    x = np.asarray(image, dtype=np.uint8)
-
-    # get rid of an image if it's wrong size
-    if x.shape != (150, 150):
-        os.remove(os.path.join(cats_pth, filename))
-        continue
-
-    assert x.shape == (150, 150)
-    x = x.reshape(150 * 150,)
-    ...
-    X[:-1, i] = x
-    Y[i] = 1
-    i += 1
-
-# loop for reading dogs images
-for filename in os.listdir(dogs_pth):
-    if i >= 30000:
-        break
-    if i % 450 == 0:
-        print(f"Done {int(i / 29999 * 100)} %")
-
-    image = Image.open(os.path.join(dogs_pth, filename))
-    x = np.asarray(image, dtype=np.uint8)
-
-    if x.shape != (150, 150):
-        os.remove(os.path.join(dogs_pth, filename))
-        continue
-
-    assert x.shape == (150, 150)
-    x = x.reshape(150 * 150,)
-    ...
-    X[:-1, i] = x
-    Y[i] = 0
-    i += 1
-
-# cats: [0 : 15000]
-# dogs: [15000: 30000]
-
-print(X)
-X[-1, :] = Y
-print(X)
-
-np.savez_compressed('data_X', X=X)
-print("DONE !!!")
+from PIL import Image
+from matplotlib import pyplot as plt
 
 
+# function to make labels data binary
+def y_to_one_number(y, num=1):
+    isNum = y[:, :] == num
+    new_y = (y + 1) * isNum // (num + 1)
+
+    return new_y
 
 
+# fuction for showing image of data
+def show_image(arr):
+    img = arr.reshape(28, 28)
+    img = Image.fromarray(img.astype('uint8'), 'L').resize((350, 350))
+    img.save('img0.jpg')
 
 
+def make_X_and_Y():
+    # reading and changing the shape of the data
+    df = pd.read_csv('train.csv')
+    data = df.to_numpy().T
+
+    # making correct X and Y for training
+    X = data[1:, :]
+    Y = data[0, :].reshape(1, 42000)
+
+    # normalizing X
+    X = (X - 127.5) / 127.5
+
+    # binary Y only for one number
+    Y = y_to_one_number(Y, num=9)
+
+    np.savez('mnist_data', X=X, Y=Y)
 
 
-
-
-
-
+if __name__ == '__main__':
+    make_X_and_Y()

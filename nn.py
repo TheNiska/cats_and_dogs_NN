@@ -1,77 +1,78 @@
 import numpy as np
-
-
-'''
-this shitty NN doesn't work because it's structure isn't suted for that
-kind of task. I will add more layers.
-'''
+import math
 
 
 def main():
-    # load data from file
-    X_dict = np.load('data_X.npz')
-    data = X_dict['X']
-    np.random.shuffle(data.T)
+    with np.load('mnist_data.npz') as data:
+        X = data['X']
+        Y = data['Y']
 
-    data_X = data[:-1, :]
-    data_Y = data[-1, :].reshape(1, 30000)
-    print(data_X.shape)
-    print(data_Y.shape)
+    n0, m = X.shape
+    print("Number of training examples: {m}")
 
-    return 0
+    n1 = 72
+    n2 = 32
+    n3 = 1
 
-    X = np.zeros(shape=(22500, 30000))
-    Y = np.zeros(shape=(1, 30000))
+    w1 = np.random.randn(n1, n0) * math.sqrt(1/n0)
+    b1 = np.random.randn(n1, 1)
 
-    X = (data_X - 127.5) / 127.5
-    Y = data_Y
+    w2 = np.random.randn(n2, n1) * math.sqrt(1/n1)
+    b2 = np.random.randn(n2, 1)
 
-    w_shape_0 = X.shape[0]
-    w_shape_1 = 1
+    w3 = np.random.randn(n3, n2) * math.sqrt(1/n2)
+    b3 = np.random.randn(n3, 1)
 
-    X_train = X[:, :29000]
-    X_test = X[:, 29000:]
-
-    Y_train = Y[:, :29000]
-    Y_test = Y[:, 29000:]
-
-    m = 29000
-
-    W = np.random.randn(w_shape_0, w_shape_1) * 0.1
-
-    b = 0
-    epsilon = 0.0000001
+    ITER = 50
     ALPHA = 0.01
-    for i in range(5):
-        Z = np.dot(W.T, X_train) + b
-        assert Z.shape == (1, 29000)
-        print(Z)
+    BATH = 1024
+    for i in range(ITER):
+        t = 0
+        overall_cost = 0
+        print(f"-----------Epoch {i}--------------")
 
-        A = 1 / (1 + math.e**(-Z))
-        assert Z.shape == (1, 29000)
-        assert Y_train.shape == Z.shape
-        print(A)
+        while t < X.shape[1]:
+            # Forward prop ---------------------------------------------------
+            z1 = np.dot(w1, X[:, t:t+BATH]) + b1
+            a1 = np.tanh(z1)
 
-        j_cost = (Y_train * np.log(A + epsilon) +
-                  (1 - Y_train) * (np.log(1 - A + epsilon)))
-        j_cost = np.sum(j_cost) / -m
-        print(j_cost)
+            z2 = np.dot(w2, a1) + b2
+            a2 = np.tanh(z2)
 
-        dz = A - Y_train
-        dw = (1 / m) * np.dot(X_train, dz.T)
-        db = (1 / m) * np.sum(dz)
-        W = W - ALPHA * dw
-        b = b - ALPHA * db
+            z3 = np.dot(w3, a2) + b3
+            a3 = 1 / (1 + np.exp(-z3))
+            # ----------------------------------------------------------------
 
-    Z = np.dot(W.T, X_test) + b
-    A = 1/(1 + math.e**(-Z))
+            cost = ((-1/BATH) * (np.dot(Y[:, t:t+BATH], np.log(a3).T) +
+                                 np.dot((1 - Y[:, t:t+BATH]), np.log(1-a3).T)))
+            overall_cost += cost
 
-    difference = np.sum(np.absolute(Y_test - A))
-    print(difference)
+            # Back prop ------------------------------------------------------
+            dz3 = a3 - Y[:, t:t+BATH]
+            dw3 = (1 / BATH) * np.dot(dz3, a2.T)
+            db3 = (1 / BATH) * np.sum(dz3, axis=1, keepdims=True)
 
-    np.save('weights', W)
-    print(b)
+            dz2 = np.dot(w3.T, dz3) * (1 - np.power(a2, 2))
+            dw2 = (1 / BATH) * (np.dot(dz2, a1.T))
+            db2 = np.sum(dz2, axis=1, keepdims=True) * (1 / BATH)
 
+            dz1 = np.dot(w2.T, dz2) * (1 - np.power(a1, 2))
+            dw1 = (1 / BATH) * np.dot(dz1, X[:, t:t+BATH].T)
+            db1 = (1 / BATH) * np.sum(dz1, axis=1, keepdims=True)
+
+            w1 = w1 - ALPHA * dw1
+            b1 = b1 - ALPHA * db1
+            w2 = w2 - ALPHA * dw2
+            b2 = b2 - ALPHA * db2
+            w3 = w3 - ALPHA * dw3
+            b3 = b3 - ALPHA * db3
+            # --------------------------------------------------------------------
+
+            t += BATH
+        print(f"Overall cost: {overall_cost}")
+
+    # saving parameters ------------------------------------
+    np.savez()
 
 if __name__ == '__main__':
     main()

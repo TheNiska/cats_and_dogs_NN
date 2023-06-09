@@ -1,5 +1,9 @@
 data_X.npz
 Animal Images/
 venv/
-test.py
+train.csv
+test.csv
+mnist_data.npz
+parameters.npz
+img0.jpg
 
