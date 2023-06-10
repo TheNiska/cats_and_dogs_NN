@@ -8,7 +8,7 @@ def main():
         Y = data['Y']
 
     n0, m = X.shape
-    print("Number of training examples: {m}")
+    print(f"Number of training examples: {m}")
 
     n1 = 72
     n2 = 32
@@ -72,7 +72,7 @@ def main():
         print(f"Overall cost: {overall_cost}")
 
     # saving parameters ------------------------------------
-    np.savez()
+    np.savez('params', w1=w1, w2=w2, w3=w3, b1=b1, b2=b2, b3=b3)
 
 if __name__ == '__main__':
     main()
