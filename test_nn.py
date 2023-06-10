@@ -21,7 +21,10 @@ def main():
     print(f"Number of training examples: {m}")
 
     t = 0
+
     BATH = 1000
+    assert m % BATH == 0
+
     print("Precisions:")
     while t < X.shape[1]:
         # Forward prop ---------------------------------------------------
@@ -36,11 +39,17 @@ def main():
 
         probs = a3 > 0.5
         y_probs = Y[:, t:t+BATH] == 1
+        sum_nums = np.sum(y_probs)
 
         isSame = np.logical_not(np.logical_xor(probs, y_probs))
-        print("%0.3f" % (np.sum(isSame) / BATH))
+        isTrueNum = np.logical_and(probs, y_probs)
+        sum_trues = np.sum(isTrueNum)
+        print(f"{sum_trues} out of {sum_nums}")
+
+        # print("%0.3f" % (np.sum(isSame) / BATH))
         # ----------------------------------------------------------------
         t += BATH
+
 
 if __name__ == '__main__':
     main()
