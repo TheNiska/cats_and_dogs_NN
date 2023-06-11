@@ -19,7 +19,7 @@ def show_image(arr):
     img.save('img0.jpg')
 
 
-def make_X_and_Y():
+def make_X_and_Y(number):
     # reading and changing the shape of the data
     df = pd.read_csv('train.csv')
     data = df.to_numpy().T
@@ -32,10 +32,10 @@ def make_X_and_Y():
     X = (X - 127.5) / 127.5
 
     # binary Y only for one number
-    Y = y_to_one_number(Y, num=9)
+    Y = y_to_one_number(Y, num=number)
 
     np.savez('mnist_data', X=X, Y=Y)
 
 
 if __name__ == '__main__':
-    make_X_and_Y()
+    make_X_and_Y(0)

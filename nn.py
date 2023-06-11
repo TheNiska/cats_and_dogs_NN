@@ -2,7 +2,7 @@ import numpy as np
 import math
 
 
-def main():
+def run_nn(iterations=50):
     with np.load('mnist_data.npz') as data:
         X = data['X']
         Y = data['Y']
@@ -10,22 +10,22 @@ def main():
     n0, m = X.shape
     print(f"Number of training examples: {m}")
 
-    n1 = 72
-    n2 = 32
+    n1 = 4
+    n2 = 1
     n3 = 1
 
-    w1 = np.random.randn(n1, n0) * math.sqrt(1/n0)
+    w1 = np.random.randn(n1, n0) * math.sqrt(1/n0)  # 4 x 784
     b1 = np.random.randn(n1, 1)
 
-    w2 = np.random.randn(n2, n1) * math.sqrt(1/n1)
+    w2 = np.random.randn(n2, n1) * math.sqrt(1/n1)  # 1 x 4
     b2 = np.random.randn(n2, 1)
 
-    w3 = np.random.randn(n3, n2) * math.sqrt(1/n2)
+    w3 = np.random.randn(n3, n2) * math.sqrt(1/n2)  # 1 x 1
     b3 = np.random.randn(n3, 1)
 
-    ITER = 50
-    ALPHA = 0.01
-    BATH = 1024
+    ITER = iterations
+    ALPHA = 0.015
+    BATH = 1000
     for i in range(ITER):
         t = 0
         overall_cost = 0
@@ -33,7 +33,7 @@ def main():
 
         while t < X.shape[1]:
             # Forward prop ---------------------------------------------------
-            z1 = np.dot(w1, X[:, t:t+BATH]) + b1
+            z1 = np.dot(w1, X[:, t:t+BATH]) + b1 # 4 x 1
             a1 = np.tanh(z1)
 
             z2 = np.dot(w2, a1) + b2
@@ -75,4 +75,4 @@ def main():
     np.savez('params', w1=w1, w2=w2, w3=w3, b1=b1, b2=b2, b3=b3)
 
 if __name__ == '__main__':
-    main()
+    run_nn()

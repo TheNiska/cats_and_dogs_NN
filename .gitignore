@@ -7,4 +7,6 @@ mnist_data.npz
 parameters.npz
 img0.jpg
 broadcasting.py
+visualized_parameters/
+__pycache__/
 
